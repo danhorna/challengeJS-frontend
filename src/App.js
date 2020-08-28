@@ -1,9 +1,17 @@
 import React from 'react';
-import './App.css';
+import { BrowserRouter as Router, Route} from 'react-router-dom';
+
+import SignUp from './components/SignUp';
+import SignIn from './components/SignIn';
+import Home from './components/Home';
 
 function App() {
   return (
-    <div>asdsad</div>
+      <Router>
+        <Route path="/" exact component={Home} />
+        <Route path="/signup" component={SignUp} />
+        <Route path="/signin" component={SignIn} />
+      </Router>
   );
 }
 

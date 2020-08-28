@@ -1,0 +1,21 @@
+html{
+	height: 100%;
+}
+
+body{
+	background-color: #F2F2F2;
+	min-height:100%
+}
+
+.noacc{		/* usado en pantalla de login para texto de registro */
+	font-family: Poppins-Regular;
+	color: #666666;
+	font-size: 1.5vh;
+}
+
+.noacclink{		/* usado en pantalla de login para texto de registro */
+	font-family: Poppins-Regular;
+	font-size: 1.5vh;
+	color: blue;
+}
+
