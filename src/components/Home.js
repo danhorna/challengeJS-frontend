@@ -46,7 +46,7 @@ function Home(){
     function elHome(){
         return(
             <div>
-                elhome
+                (<Redirect push to="/me/apps"/>)
             </div>
         )
     }

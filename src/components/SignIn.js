@@ -104,7 +104,7 @@ function SignIn(){
         <div className="container d-flex h-100">
             {   cargando.estado === 'cargando'? loading() : 
                 cargando.estado === 'notlogged'? bodySignin() : 
-                (<Redirect push to="/"/>)
+                (<Redirect push to="/me/apps"/>)
             }
             
 	    </div>

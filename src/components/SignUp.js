@@ -120,7 +120,7 @@ function SignUp() {
             {   cargando.estado === 'cargando'? loading() : 
                 cargando.estado === 'registered'? (<Redirect push to="/signin"/>) : 
                 cargando.estado === 'notlogged'? bodySignup() :
-                (<Redirect push to="/"/>)
+                (<Redirect push to="/me/apps"/>)
             }
         </div>
     )

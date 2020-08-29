@@ -19,3 +19,7 @@ body{
 	color: blue;
 }
 
+.card-img-top {
+	height: 8vw;
+    object-fit: contain;
+}
