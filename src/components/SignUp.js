@@ -25,13 +25,18 @@ function SignUp() {
             password: campos.password,
             rol: campos.rol
         }
-        axios.post('http://localhost:3000/api/users', { data })
-            .then(res => {
-                setAcceso({
-                    ...acceso,
-                    estado: 'registered'
+        if (/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
+        .test(data.email)) {
+            axios.post('http://localhost:3000/api/users', { data })
+                .then(res => {
+                    setAcceso({
+                        ...acceso,
+                        estado: 'registered'
+                    })
                 })
-            })
+        }else {
+            alert("La dirección de email es incorrecta.");
+        }
     }
 
     const refresh = (e) => {
@@ -68,7 +73,6 @@ function SignUp() {
                         }
                 })
         }
-        console.log('test')
         comp()
         return () => { isMounted = false };
     }, [])
@@ -84,10 +88,10 @@ function SignUp() {
                             <form className="mt-5" onSubmit={theSubmit}>
                                 <input type="email" className="form-control" id="email" name="email" placeholder="Email" value={campos.email} onChange={refresh} />
                                 <br />
-                                <input type="password" className="form-control" id="password" name="password" placeholder="Password" value={campos.password} onChange={refresh} />
+                                <input type="password" className="form-control" id="password" name="password" placeholder="Password" value={campos.password} onChange={refresh} required/>
                                 <br />
                                 <div className="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="client" name="rol" className="custom-control-input" onChange={refresh} />
+                                    <input type="radio" id="client" name="rol" className="custom-control-input" onChange={refresh} required/>
                                     <label className="custom-control-label" htmlFor="client">Cliente</label>
                                 </div>
                                 <div className="custom-control custom-radio custom-control-inline">

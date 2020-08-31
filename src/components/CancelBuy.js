@@ -12,7 +12,6 @@ function CancelBuy(props) {
 
     const theSubmit = () => {
         const data = props.location.param1;
-        console.log(data)
         axios.post('http://localhost:3000/api/buy/cancel', { data })
             .then(res => {
                 setCargando({

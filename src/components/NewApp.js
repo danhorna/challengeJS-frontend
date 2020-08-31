@@ -60,7 +60,6 @@ function NewApp() {
             ...actual,
             [name]: value
         });
-        console.log(actual)
     }
 
     const theSubmit = (e) => {
@@ -102,7 +101,7 @@ function NewApp() {
                             <div className="card-body">
                                 <form className="mt-5" onSubmit={theSubmit}>
                                     <label htmlFor="name" className="col-form-label">Nombre:</label>
-                                    <input type="text" className="form-control" id="name" name="name" value={actual.name || ''} placeholder="Nombre" step="0.01" onChange={refresh} />
+                                    <input type="text" className="form-control" id="name" name="name" value={actual.name || ''} placeholder="Nombre" step="0.01" onChange={refresh} required/>
                                     <br />
                                     <label htmlFor="category" className="col-form-label">Categoria:</label>
                                     <select className="form-control" id="category" name="category" onChange={refresh}>
@@ -112,10 +111,10 @@ function NewApp() {
                                     </select>
                                     <br />
                                     <label htmlFor="price" className="col-form-label">Precio:</label>
-                                    <input type="number" className="form-control" id="price" name="price" value={actual.price || ''} placeholder="Precio" step="0.01" onChange={refresh} />
+                                    <input type="number" className="form-control" id="price" name="price" value={actual.price || ''} placeholder="Precio" step="0.01" onChange={refresh} required/>
                                     <br />
                                     <label htmlFor="logo" className="col-form-label">Logo URL:</label>
-                                    <input type="text" className="form-control" id="logo" name='logo' placeholder="Logo URL" value={actual.logo || ''} onChange={refresh} />
+                                    <input type="text" className="form-control" id="logo" name='logo' placeholder="Logo URL" value={actual.logo || ''} onChange={refresh} required />
                                     <br />
                                     <button type="submit" className="btn btn-info rounded-pill">Publicar</button>
                                     <br />
@@ -141,7 +140,6 @@ function NewApp() {
 
     return (
         <div>
-            {console.log(acceso)}
             {
                 acceso.estado === 'esperando' ? <Loading /> :
                     !acceso.aprobado ? <NoAprobado /> :

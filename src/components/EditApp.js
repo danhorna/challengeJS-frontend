@@ -83,7 +83,6 @@ function EditApp(props) {
             <Navigator />
             {actual.scont ? cont() : null}
             {actual.salert ? alert() : null}
-            {console.log((props.location.param1))}
         </div>
     )
 }

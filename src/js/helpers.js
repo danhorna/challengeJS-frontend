@@ -8,7 +8,6 @@ export async function comprobarLogin(){
                 await axios.post('http://localhost:3000/api/users/check', {tokenls})
                     .then(res =>{
                         if (res.data.done){
-                            console.log('qsyo')
                             data = res.data;
                         } else {
                             data = res.data

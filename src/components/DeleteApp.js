@@ -12,10 +12,8 @@ function DeleteApp(props) {
 
     const theSubmit = ()=>{
         const data = props.location.param1;
-        console.log(data)
         axios.post('http://localhost:3000/api/apps/deleteapp', {data})
             .then(res =>{
-                console.log('uoooo')
                 setCargando({
                     salert: true
                 })

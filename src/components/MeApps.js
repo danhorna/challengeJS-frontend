@@ -38,7 +38,6 @@ function MeApps() {
         function devapps() {
             axios.post('http://localhost:3000/api/apps/getdevapps', acceso)
                 .then(res => {
-                    console.log(res)
                     setRender({
                         estado: 'go',
                         appsToShow: res.data

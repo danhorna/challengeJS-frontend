@@ -122,7 +122,6 @@ function SeeApps() {
         else tipo = "Mis compras"
         return (
             <div>
-                {console.log(acceso)}
                 <Navigator seccion={tipo} />
                 <div className="card-columns m-5">{
                     acceso.apps.map(function (item, i) {
