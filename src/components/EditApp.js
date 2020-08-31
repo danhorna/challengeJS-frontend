@@ -3,12 +3,13 @@ import axios from 'axios';
 import { Redirect, Link } from 'react-router-dom';
 
 // agregar caso de si el parametro es null al entrar a /edit
-import Navigator from '../components/Navigator'
+import Navigator from '../components/purpose/Navigator'
 function EditApp(props) {
     const [actual, setActual] = useState({
         price: props.location.param1.price,
         logo: props.location.param1.logo,
         salert: false,
+        scont: true,
         redirect: false
     })
 
@@ -31,7 +32,8 @@ function EditApp(props) {
             .then(res =>{
                 setActual({
                     ...actual,
-                    salert: true
+                    salert: true,
+                    scont: false
                 })
             })
     }
@@ -46,10 +48,8 @@ function EditApp(props) {
         )
     }
 
-    return (
-        <div>
-            {actual.redirect ? (<Redirect push to="/me/apps"/>) : null}
-            <Navigator />
+    const cont = ()=>{
+        return (
             <div className="container d-flex h-100 mt-5">
             <div className="align-self-center w-100">
                 <div className="col-lg-4 mx-auto">
@@ -70,10 +70,19 @@ function EditApp(props) {
                             </form>
                         </div>
                     </div>
-                    {actual.salert ? alert() : null}
+                    
                 </div>
             </div>
             </div>
+        )
+    }
+
+    return (
+        <div>
+            {actual.redirect ? (<Redirect push to="/me/apps"/>) : null}
+            <Navigator />
+            {actual.scont ? cont() : null}
+            {actual.salert ? alert() : null}
             {console.log((props.location.param1))}
         </div>
     )

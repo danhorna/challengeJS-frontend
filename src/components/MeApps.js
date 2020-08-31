@@ -1,48 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { Redirect, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
-import Navigator from '../components/Navigator';
+import Navigator from '../components/purpose/Navigator';
+import {comprobarLogin} from '../js/helpers';
+import Loading from './purpose/Loading';
+import NoAprobado from './purpose/NoAprobado';
 
 function MeApps() {
-    const [cargando, setCargando] = useState({
-        estado: 'cargando',
+    const [acceso, setAcceso] = useState({
+        estado: 'esperando',
+        aprobado : null,
         rol: '',
         id: '',
-    })
+    });
+
     const [render, setRender] = useState({
         estado: 'wait',
-        appsToShow: null
+        appsToShow: null,
+
     })
 
     useEffect(() => {
         let isMounted = true;
-        function checkUser() {
-            var tokenls = localStorage.getItem("loginToken");
-            if (tokenls != null) {
-                axios.post('http://localhost:3000/api/users/check', { tokenls })
-                    .then(res => {
-                        if (res.data.done === 'accept') {
-                            if (isMounted)
-                                setCargando({
-                                    estado: res.data.done,
-                                    rol: res.data.rol,
-                                    id: res.data.id
-                                })
-                        } else {
-                            if (res.data.done === 'invalid') {
-                                if (isMounted)
-                                    setCargando({
-                                        estado: 'denied'
-                                    })
-                            }
-                        }
-                    })
-            }
+        function comp (){
+            comprobarLogin()
+                .then(res =>{
+                    if (isMounted)
+                        setAcceso({
+                            rol: res.rol,
+                            id: res.id,
+                            estado: 'listo',
+                            aprobado : res.done
+                        })
+                })
         }
+
         function devapps() {
-            axios.post('http://localhost:3000/api/apps/getdevapps', cargando)
+            axios.post('http://localhost:3000/api/apps/getdevapps', acceso)
                 .then(res => {
-                    console.log('entro')
+                    console.log(res)
                     setRender({
                         estado: 'go',
                         appsToShow: res.data
@@ -50,63 +46,98 @@ function MeApps() {
                 })
         }
 
-        if (cargando.estado !== 'accept') {
-            checkUser();
+        if (acceso.estado !== 'listo') {
+            comp();
         }
-        console.log(cargando.estado)
-        if ((cargando.estado === 'accept') && (render.estado !== 'go')) {
-            console.log('www')
-            if (cargando.rol === 'dev') {
+
+        function appsCompradas(){
+            var forTheBoys = [];
+            axios.post('http://localhost:3000/api/purchases', acceso)
+                .then( async (res) => {
+                    if (res.data !== null){
+                        for (const item of res.data){
+                            var prod = await axios.post('http://localhost:3000/api/apps/getbyid',item)
+                            prod.data.idcompra = item.id;
+                            forTheBoys.push(prod.data)
+                        }
+                    }
+                    setRender({
+                        estado: 'go',
+                        appsToShow: forTheBoys
+                    })
+                    
+                })
+        }
+
+        if ((acceso.estado === 'listo') && (render.estado !== 'go')) {
+            if (acceso.rol === 'dev') {
                 devapps()
+            } else {
+                appsCompradas()
             }
         }
 
         return () => { isMounted = false };
     })
 
-    function loading() {
-        return (
-            <div>
-                cargando
-            </div>
-        )
-    }
-
-    function delApp(id,name){
-        console.log(id)
-        var apptodel = window.confirm("Realmente desea eliminar la aplicacion " + name + " ?");
-        if (apptodel === true){
-            axios.post('http://localhost:3000/api/apps/deleteapp', {id})
-                .then(res => {
-                    console.log(res)
-                })
-        }
-    }
-
     function elMe() {
         if (render.estado === 'go') {
-            return (
-                <div>
-                    <Navigator/>
-                    <div className="card-columns m-5">{
-                        render.appsToShow.map(function (item, i) {
-                            var goTo ={
-                                pathname: '/me/edit/',
-                                param1: item
-                            }
-                            return <div className="card text-center" key={i}>
-                                <img className="card-img-top mt-3" src={item.logo} alt="Card image cap" />
-                                <div className="card-body">
-                                    <h5 className="card-title">{item.name}</h5>
-                                    <p className="card-text">Precio: {item.price}</p>
-                                    <Link className="btn btn-primary" to={goTo}>Editar</Link>
-                                    <button className="btn btn-danger ml-5" onClick={(e)=>delApp(item.id,item.name)}>Eliminar</button>
+            if (acceso.rol === 'dev') {
+                return (
+                    <div>
+                        <Navigator seccion= "Mis apps"/>
+                        <div className="m-5">
+                            <Link className="btn btn-outline-secondary" to="/me/new">Nueva aplicacion</Link>
+                        </div>
+                        <div className="card-columns m-5">{
+                            render.appsToShow.map(function (item, i) {
+                                var goTo ={
+                                    pathname: '/me/edit/',
+                                    param1: item
+                                }
+                                var del ={
+                                    pathname: '/me/delete',
+                                    param1: item
+                                }
+                                return <div className="card text-center" key={i}>
+                                    <img className="card-img-top mt-3" src={item.logo} alt="logo" />
+                                    <div className="card-body">
+                                        <h5 className="card-title">{item.name}</h5>
+                                        <p className="text-info">Categoria: {item.category}</p>
+                                        <p className="card-text">Precio: ${item.price}</p>
+                                        <Link className="btn btn-primary" to={goTo}>Editar</Link>
+                                        <Link className="btn btn-danger ml-5" to={del}>Eliminar</Link>
+                                    </div>
                                 </div>
-                            </div>
-                        })}
+                            })}
+                        </div>
                     </div>
-                </div>
-            )
+                )
+            } else {
+                return (
+                    <div>
+                        <Navigator seccion= "Mis compras"/>
+                        <div className="card-columns m-5">
+                            {
+                            render.appsToShow.map(function (item, i) {
+                                var del ={
+                                    pathname: '/me/cancel',
+                                    param1: item
+                                }
+                                return <div className="card text-center" key={i}>
+                                    <img className="card-img-top mt-3" src={item.logo} alt="logo" />
+                                    <div className="card-body">
+                                        <h5 className="card-title">{item.name}</h5>
+                                        <p className="text-info">Categoria: {item.category}</p>
+                                        <p className="card-text">Precio: ${item.price}</p>
+                                        <Link className="btn btn-danger" to={del}>Cancelar compra</Link>
+                                    </div>
+                                </div>
+                            })}
+                        </div>
+                    </div>
+                )
+            }
         } else {
             return (
                 <div>Loading...</div>
@@ -116,9 +147,10 @@ function MeApps() {
 
     return (
         <div>
-            {cargando.estado === 'cargando' ? loading() :
-                cargando.estado === 'accept' ? elMe() :
-                    (<Redirect push to="/signin" />)
+            {
+                acceso.estado === 'esperando' ? <Loading/> :
+                acceso.aprobado ? elMe() :
+                <NoAprobado/>
 
             }
         </div>

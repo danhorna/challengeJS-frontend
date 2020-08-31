@@ -1,14 +1,22 @@
-import React, {useState, useEffect} from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
+import Loading from './purpose/Loading';
+import { comprobarLogin } from '../js/helpers';
+import Aprobado from './purpose/Aprobado';
+import NoAprobado from './purpose/NoAprobado'
 
 function SignUp() {
-    const [campos,setCampos] = useState({
+    const [campos, setCampos] = useState({
         email: '',
         password: '',
         rol: '',
     })
-    const [cargando,setCargando] = useState({estado : 'cargando'})
+
+    const [acceso, setAcceso] = useState({
+        estado: 'esperando',
+        aprobado: null
+    });
 
     const theSubmit = (e) => {
         e.preventDefault();
@@ -17,72 +25,56 @@ function SignUp() {
             password: campos.password,
             rol: campos.rol
         }
-        axios.post('http://localhost:3000/api/users', {data})
-            .then(res =>{
-                setCargando({
-                    estado : 'registered'
+        axios.post('http://localhost:3000/api/users', { data })
+            .then(res => {
+                setAcceso({
+                    ...acceso,
+                    estado: 'registered'
                 })
             })
     }
 
     const refresh = (e) => {
-        const {value, id, name} = e.target;
-        if (name !== 'rol'){
+        const { value, id, name } = e.target;
+        if (name !== 'rol') {
             setCampos({
                 ...campos,
-                [name] : value
+                [name]: value
             });
         } else {
             setCampos({
                 ...campos,
-                [name] : id
+                [name]: id
             });
         }
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         let isMounted = true;
-        function checkUser(){
-            var tokenls = localStorage.getItem("loginToken");
-            if (tokenls != null){
-                axios.post('http://localhost:3000/api/users/check', {tokenls})
-                    .then(res =>{
-                        console.log(res.data)
-                        if (res.data.done === 'accept'){
-                            if (isMounted)
-                                setCargando({
-                                    estado: 'logged'
-                                })
-                        } else {
-                            if(res.data.done === 'invalid'){
-                                if (isMounted)
-                                    setCargando({
-                                        estado: 'notlogged'
-                                    })
-                            }
+        function comp() {
+            comprobarLogin()
+                .then(res => {
+                    if (isMounted)
+                        if (res !== null)
+                            setAcceso({
+                                estado: 'listo',
+                                aprobado: res.done
+                            })
+                        else {
+                            setAcceso({
+                                estado: 'listo',
+                                aprobado: false
+                            })
                         }
-                    })
-            }
-            else {
-                setCargando({
-                    estado : 'notlogged'
                 })
-            }
         }
-        checkUser();
+        console.log('test')
+        comp()
         return () => { isMounted = false };
     }, [])
 
-    function loading(){
+    function bodySignup() {
         return (
-            <div>
-                cargando
-            </div>
-        )
-    }
-
-    function bodySignup(){
-        return(
             <div className="align-self-center w-100">
                 <div className="col-lg-4 mx-auto">
                     <div className="card text-center p-4 shadow-lg p-3 mb-5 bg-white rounded">
@@ -90,16 +82,16 @@ function SignUp() {
                             <h5 className="card-title">Registrate</h5>
                             <h6 className="card-subtitle text-muted mt-1">Completa los datos</h6>
                             <form className="mt-5" onSubmit={theSubmit}>
-                                <input type="email" className="form-control" id="email" name="email" placeholder="Email" value={campos.email} onChange={refresh}/>
+                                <input type="email" className="form-control" id="email" name="email" placeholder="Email" value={campos.email} onChange={refresh} />
                                 <br />
-                                <input type="password" className="form-control" id="password" name="password" placeholder="Password" value={campos.password} onChange={refresh}/>
+                                <input type="password" className="form-control" id="password" name="password" placeholder="Password" value={campos.password} onChange={refresh} />
                                 <br />
                                 <div className="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="client" name="rol" className="custom-control-input" onChange={refresh}/>
+                                    <input type="radio" id="client" name="rol" className="custom-control-input" onChange={refresh} />
                                     <label className="custom-control-label" htmlFor="client">Cliente</label>
                                 </div>
                                 <div className="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="dev" name="rol" className="custom-control-input" onChange={refresh}/>
+                                    <input type="radio" id="dev" name="rol" className="custom-control-input" onChange={refresh} />
                                     <label className="custom-control-label" htmlFor="dev">Desarrollador</label>
                                 </div>
                                 <br /><br />
@@ -117,10 +109,10 @@ function SignUp() {
 
     return (
         <div className="container d-flex h-100">
-            {   cargando.estado === 'cargando'? loading() : 
-                cargando.estado === 'registered'? (<Redirect push to="/signin"/>) : 
-                cargando.estado === 'notlogged'? bodySignup() :
-                (<Redirect push to="/me/apps"/>)
+            {acceso.estado === 'cargando' ? <Loading /> :
+                acceso.estado === 'registered' ? <NoAprobado /> :
+                    acceso.aprobado ? <Aprobado /> :
+                        bodySignup()
             }
         </div>
     )

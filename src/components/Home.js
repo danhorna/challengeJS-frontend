@@ -1,61 +1,52 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
-import axios from 'axios';
+import { comprobarLogin } from '../js/helpers';
+import Loading from './purpose/Loading'
+import NoAprobado from './purpose/NoAprobado'
 
+function Home() {
+    const [acceso, setAcceso] = useState({
+        estado: 'esperando',
+        aprobado: null
+    });
 
-
-function Home(){
-    const [cargando,setCargando] = useState({estado : 'cargando'})
-
-    useEffect(()=>{
+    useEffect(() => {
         let isMounted = true;
-        function checkUser(){
-            var tokenls = localStorage.getItem("loginToken");
-            if (tokenls != null){
-                axios.post('http://localhost:3000/api/users/check', {tokenls})
-                    .then(res =>{
-                        console.log(res.data)
-                        if (res.data.done === 'accept'){
-                            if (isMounted)
-                                setCargando({
-                                    estado: 'accept'
-                                })
-                        } else {
-                            if(res.data.done === 'invalid'){
-                                if (isMounted)
-                                    setCargando({
-                                        estado: 'denied'
-                                    })
-                            }
+        function comp() {
+            comprobarLogin()
+                .then(res => {
+                    if (isMounted)
+                        if (res !== null)
+                            setAcceso({
+                                estado: 'listo',
+                                aprobado: res.done
+                            })
+                        else {
+                            setAcceso({
+                                estado: 'listo',
+                                aprobado: false
+                            })
                         }
-                    })
-            }
+                })
         }
-        checkUser();
+        comp()
         return () => { isMounted = false };
-    }, [])
+    })
 
-    function loading(){
+    function elHome() {
         return (
             <div>
-                cargando
+                (<Redirect push to="/me/apps" />)
             </div>
         )
     }
 
-    function elHome(){
-        return(
-            <div>
-                (<Redirect push to="/me/apps"/>)
-            </div>
-        )
-    }
-
-    return(
+    return (
         <div>
-            {   cargando.estado === 'cargando'? loading() : 
-                cargando.estado === 'accept'? elHome() : 
-                (<Redirect push to="/signin"/>)
+            {
+                acceso.estado === 'esperando' ? <Loading /> :
+                    acceso.aprobado ? elHome() :
+                        <NoAprobado />
             }
         </div>
     )

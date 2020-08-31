@@ -1,14 +1,20 @@
 import React, {useState, useEffect} from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
+import Loading from './purpose/Loading';
+import {comprobarLogin} from '../js/helpers';
+import Aprobado from './purpose/Aprobado';
 
 function SignIn(){
+    const [acceso, setAcceso] = useState({
+        estado: 'esperando',
+        aprobado : null
+    });
+
     const [campos,setCampos] = useState({
         email: '',
         password: '',
     })
-
-    const [cargando,setCargando] = useState({estado : 'cargando'})
 
     const theSubmit = (e) => {
         e.preventDefault();
@@ -19,8 +25,9 @@ function SignIn(){
         axios.post('http://localhost:3000/api/users/login', {data})
             .then(res =>{
                 localStorage.setItem( "loginToken", res.data);
-                setCargando({
-                    estado : 'logged'
+                setAcceso({
+                    ...acceso,
+                    aprobado : true
                 })
             })
     }
@@ -35,44 +42,26 @@ function SignIn(){
 
     useEffect(()=>{
         let isMounted = true;
-        function checkUser(){
-            var tokenls = localStorage.getItem("loginToken");
-            if (tokenls != null){
-                axios.post('http://localhost:3000/api/users/check', {tokenls})
-                    .then(res =>{
-                        console.log(res.data)
-                        if (res.data.done === 'accept'){
-                            if (isMounted)
-                                setCargando({
-                                    estado: 'logged'
-                                })
-                        } else {
-                            if(res.data.done === 'invalid'){
-                                if (isMounted)
-                                    setCargando({
-                                        estado: 'notlogged'
-                                    })
-                            }
+        function comp (){
+            comprobarLogin()
+                .then(res =>{
+                    if (isMounted)
+                        if (res !== null)
+                            setAcceso({
+                                estado: 'listo',
+                                aprobado : res.done
+                            })
+                        else{
+                            setAcceso({
+                                estado: 'listo',
+                                aprobado: false
+                            })
                         }
-                    })
-            }
-            else {
-                setCargando({
-                    estado : 'notlogged'
                 })
-            }
         }
-        checkUser();
+        comp()
         return () => { isMounted = false };
-    }, [])
-
-    function loading(){
-        return (
-            <div>
-                cargando
-            </div>
-        )
-    }
+    },[])
 
     function bodySignin(){
         return(
@@ -102,9 +91,9 @@ function SignIn(){
 
     return(
         <div className="container d-flex h-100">
-            {   cargando.estado === 'cargando'? loading() : 
-                cargando.estado === 'notlogged'? bodySignin() : 
-                (<Redirect push to="/me/apps"/>)
+            {   acceso.estado === 'esperando'? <Loading/> : 
+                acceso.aprobado ? <Aprobado/> : 
+                bodySignin()
             }
             
 	    </div>
