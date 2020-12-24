@@ -1,20 +1,27 @@
 import axios from 'axios';
 
-export async function comprobarLogin(){
-    var data;
+export async function checkLogin() {
+    let data;
+    let token = localStorage.getItem("loginToken");
+    if (token) {
+        await axios.post(process.env.REACT_APP_BACK_URL + '/api/users/check', { token })
+            .then(res => {
+                data = true
+            })
+            .catch(err => {
+                localStorage.removeItem("loginToken")
+                data = false
+            })
+    } else {
+        data = false
+    }
+    return data;
+}
 
-    var tokenls = localStorage.getItem("loginToken");
-            if (tokenls != null){
-                await axios.post('http://localhost:3000/api/users/check', {tokenls})
-                    .then(res =>{
-                        if (res.data.done){
-                            data = res.data;
-                        } else {
-                            data = res.data
-                        }
-                    })
-            }else {
-                data = null
-            }
-    return await data;
+export function validateEmail(email) {
+    let emailtest = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[A-Za-z]+$/;
+    if (emailtest.test(email))
+        return true
+    else
+        return false
 }

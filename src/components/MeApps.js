@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import axios from 'axios';
 import Navigator from '../components/purpose/Navigator';
-import {comprobarLogin} from '../js/helpers';
+import {checkLogin} from '../js/helpers';
 import Loading from './purpose/Loading';
-import NoAprobado from './purpose/NoAprobado';
 
 function MeApps() {
     const [acceso, setAcceso] = useState({
@@ -23,7 +22,7 @@ function MeApps() {
     useEffect(() => {
         let isMounted = true;
         function comp (){
-            comprobarLogin()
+            checkLogin()
                 .then(res =>{
                     if (isMounted)
                         setAcceso({
@@ -149,7 +148,7 @@ function MeApps() {
             {
                 acceso.estado === 'esperando' ? <Loading/> :
                 acceso.aprobado ? elMe() :
-                <NoAprobado/>
+                <Redirect push to="/signin" />
 
             }
         </div>

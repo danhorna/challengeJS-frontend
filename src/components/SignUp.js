@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import axios from 'axios';
 import Loading from './purpose/Loading';
-import { comprobarLogin } from '../js/helpers';
+import { checkLogin } from '../js/helpers';
 import Aprobado from './purpose/Aprobado';
-import NoAprobado from './purpose/NoAprobado'
 
 function SignUp() {
     const [campos, setCampos] = useState({
@@ -20,14 +19,14 @@ function SignUp() {
 
     const theSubmit = (e) => {
         e.preventDefault();
-        const data = {
+        var data = {
             email: campos.email,
             password: campos.password,
             rol: campos.rol
         }
-        if (/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
-        .test(data.email)) {
-            axios.post('http://localhost:3000/api/users', { data })
+        let emailtest = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[A-Za-z]+$/;
+        if (emailtest.test(data.email)) {
+            axios.post('http://localhost:3000/api/users', data )
                 .then(res => {
                     setAcceso({
                         ...acceso,
@@ -57,7 +56,7 @@ function SignUp() {
     useEffect(() => {
         let isMounted = true;
         function comp() {
-            comprobarLogin()
+            checkLogin()
                 .then(res => {
                     if (isMounted)
                         if (res !== null)
@@ -114,7 +113,7 @@ function SignUp() {
     return (
         <div className="container d-flex h-100">
             {acceso.estado === 'cargando' ? <Loading /> :
-                acceso.estado === 'registered' ? <NoAprobado /> :
+                acceso.estado === 'registered' ? <Redirect push to="/signin" /> :
                     acceso.aprobado ? <Aprobado /> :
                         bodySignup()
             }

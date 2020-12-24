@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom'
-import { comprobarLogin } from '../js/helpers';
+import { Link, Redirect } from 'react-router-dom'
+import { checkLogin } from '../js/helpers';
 
 import Navigator from '../components/purpose/Navigator'
 import Loading from './purpose/Loading';
-import NoAprobado from './purpose/NoAprobado';
 import SinPermiso from './purpose/SinPermiso';
 
 function NewApp() {
@@ -19,7 +18,7 @@ function NewApp() {
     useEffect(() => {
         let isMounted = true;
         function comp() {
-            comprobarLogin()
+            checkLogin()
                 .then(res => {
                     if (isMounted)
                         if (res !== null)
@@ -142,7 +141,7 @@ function NewApp() {
         <div>
             {
                 acceso.estado === 'esperando' ? <Loading /> :
-                    !acceso.aprobado ? <NoAprobado /> :
+                    !acceso.aprobado ? <Redirect push to="/signin" /> :
                         acceso.rol === 'dev' ? elMe() :
                             <SinPermiso />
             }

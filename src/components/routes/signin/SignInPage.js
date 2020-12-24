@@ -1,15 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import Loading from './purpose/Loading';
-import { comprobarLogin } from '../js/helpers';
-import Aprobado from './purpose/Aprobado';
+import { validateEmail } from '../../../js/helpers';
 
-function SignIn() {
-    const [acceso, setAcceso] = useState({
-        estado: 'esperando',
-        aprobado: null
-    });
+function SignIn(props) {
 
     const [campos, setCampos] = useState({
         email: '',
@@ -18,19 +12,14 @@ function SignIn() {
 
     const theSubmit = (e) => {
         e.preventDefault();
-        const data = {
-            email: campos.email,
-            password: campos.password
-        }
-        if (/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
-        .test(data.email)) {
-            axios.post('http://localhost:3000/api/users/login', { data })
+        if (validateEmail(campos.email)) {
+            axios.post(process.env.REACT_APP_BACK_URL + '/api/users/login', campos )
                 .then(res => {
                     localStorage.setItem("loginToken", res.data);
-                    setAcceso({
-                        ...acceso,
-                        aprobado: true
-                    })
+                    props.history.push('/')     //VERIFICAR FUNCIONAMIENTO
+                })
+                .catch((e)=>{
+                    console.log(e)
                 })
         } else {
             alert("La dirección de email es incorrecta.");
@@ -46,31 +35,8 @@ function SignIn() {
         });
     }
 
-    useEffect(() => {
-        let isMounted = true;
-        function comp() {
-            comprobarLogin()
-                .then(res => {
-                    if (isMounted)
-                        if (res !== null)
-                            setAcceso({
-                                estado: 'listo',
-                                aprobado: res.done
-                            })
-                        else {
-                            setAcceso({
-                                estado: 'listo',
-                                aprobado: false
-                            })
-                        }
-                })
-        }
-        comp()
-        return () => { isMounted = false };
-    }, [])
-
-    function bodySignin() {
-        return (
+    return (
+        <div className="container d-flex h-100">
             <div className="align-self-center w-100">
                 <div className="col-lg-4 mx-auto">
                     <div className="card text-center p-4 shadow-lg p-3 mb-5 bg-white rounded">
@@ -92,16 +58,6 @@ function SignIn() {
                     </div>
                 </div>
             </div>
-        )
-    }
-
-    return (
-        <div className="container d-flex h-100">
-            {acceso.estado === 'esperando' ? <Loading /> :
-                acceso.aprobado ? <Aprobado /> :
-                    bodySignin()
-            }
-
         </div>
     )
 }

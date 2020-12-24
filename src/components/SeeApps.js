@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom'
 import Navigator from '../components/purpose/Navigator';
-import { comprobarLogin } from '../js/helpers';
+import { checkLogin } from '../js/helpers';
 import Loading from './purpose/Loading';
-import NoAprobado from './purpose/NoAprobado';
 
 function SeeApps() {
     const [acceso, setAcceso] = useState({
@@ -23,7 +22,7 @@ function SeeApps() {
         let isMounted = true;
 
         function comp() {
-            comprobarLogin()
+            checkLogin()
                 .then(res => {
                     if (isMounted)
                         if (res !== null)
@@ -149,7 +148,7 @@ function SeeApps() {
                 acceso.postCompra ? (<Redirect push to="/me/apps" />) :
                     acceso.estado === 'esperando' ? <Loading /> :
                         acceso.aprobado ? elMe() :
-                            <NoAprobado />
+                            <Redirect push to="/signin" />
             }
         </div>
     )
