@@ -25,3 +25,21 @@ export function validateEmail(email) {
     else
         return false
 }
+
+export async function getUser() {
+    let data;
+    let token = localStorage.getItem("loginToken");
+    if (token) {
+        await axios.post(process.env.REACT_APP_BACK_URL + '/api/users/check', { token })
+            .then(res => {
+                data = res.data
+            })
+            .catch(err => {
+                localStorage.removeItem("loginToken")
+                data = false
+            })
+    } else {
+        data = false
+    }
+    return data;
+}

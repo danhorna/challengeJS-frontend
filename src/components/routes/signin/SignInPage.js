@@ -46,7 +46,7 @@ function SignIn(props) {
                             <form className="mt-5" onSubmit={theSubmit}>
                                 <input type="email" className="form-control" id="email" name="email" placeholder="Email" value={campos.email} onChange={refresh} />
                                 <br />
-                                <input type="password" className="form-control" id="password" name='password' placeholder="Password" value={campos.password} onChange={refresh} required/>
+                                <input type="password" autoComplete="on" className="form-control" id="password" name='password' placeholder="Password" value={campos.password} onChange={refresh} required/>
                                 <br />
                                 <button type="submit" className="btn btn-info rounded-pill">Iniciar Sesion</button>
                                 <br />

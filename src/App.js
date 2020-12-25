@@ -15,7 +15,7 @@ import CancelBuy from './components/CancelBuy'
 function App() {
   return (
       <Router>
-        <LoggedRoute path="/" exact component={Home} />
+        <LoggedRoute component={Home} path="/" exact />
         <Route path="/apps" component={SeeApps} />
         <Route path="/signup" component={SignUp} />
         <Route path="/signin" component={SignIn} />

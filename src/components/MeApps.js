@@ -1,86 +1,64 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Navigator from '../components/purpose/Navigator';
-import {checkLogin} from '../js/helpers';
-import Loading from './purpose/Loading';
+import { getUser } from '../js/helpers';
 
 function MeApps() {
-    const [acceso, setAcceso] = useState({
-        estado: 'esperando',
-        aprobado : null,
+    const [user, setUser] = useState({
+        loaded: false,
         rol: '',
         id: '',
+        appsToShow: null
     });
 
-    const [render, setRender] = useState({
-        estado: 'wait',
-        appsToShow: null,
-
-    })
-
     useEffect(() => {
-        let isMounted = true;
-        function comp (){
-            checkLogin()
-                .then(res =>{
-                    if (isMounted)
-                        setAcceso({
-                            rol: res.rol,
-                            id: res.id,
-                            estado: 'listo',
-                            aprobado : res.done
-                        })
-                })
+
+        async function dev() {
+            return await axios.get( process.env.REACT_APP_BACK_URL + '/api/users/' + user.id + '/apps')
         }
 
-        function devapps() {
-            axios.post('http://localhost:3000/api/apps/getdevapps', acceso)
-                .then(res => {
-                    setRender({
-                        estado: 'go',
-                        appsToShow: res.data
-                    })
-                })
-        }
-
-        if (acceso.estado !== 'listo') {
-            comp();
-        }
-
-        function appsCompradas(){
-            var forTheBoys = [];
-            axios.post('http://localhost:3000/api/purchases', acceso)
-                .then( async (res) => {
-                    if (res.data !== null){
-                        for (const item of res.data){
-                            var prod = await axios.post('http://localhost:3000/api/apps/getbyid',item)
-                            prod.data.idcompra = item.id;
-                            forTheBoys.push(prod.data)
-                        }
-                    }
-                    setRender({
-                        estado: 'go',
-                        appsToShow: forTheBoys
-                    })
+        async function client(){
+            return await await axios.get( process.env.REACT_APP_BACK_URL + '/api/users/' + user.id + '/purchases')
+                // .then( async (res) => {
+                //     if (res.data !== null){
+                //         for (const item of res.data){
+                //             var prod = await axios.post('http://localhost:3000/api/apps/getbyid',item)
+                //             prod.data.idcompra = item.id;
+                //             forTheBoys.push(prod.data)
+                //         }
+                //     }
+                //     setRender({
+                //         estado: 'go',
+                //         appsToShow: forTheBoys
+                //     })
                     
+                // })
+        }
+
+        if (!user.loaded) {
+            getUser()
+                .then(async res => {
+                    let apps = null
+                    if (res.rol === 'dev'){
+                        apps = await dev()
+                    }
+                    else {
+                        apps = await client()
+                    }
+                    setUser({
+                        loaded: true,
+                        rol: res.rol,
+                        id: res.id,
+                        appsToShow: apps.data
+                    })
                 })
         }
-
-        if ((acceso.estado === 'listo') && (render.estado !== 'go')) {
-            if (acceso.rol === 'dev') {
-                devapps()
-            } else {
-                appsCompradas()
-            }
-        }
-
-        return () => { isMounted = false };
     })
 
     function elMe() {
-        if (render.estado === 'go') {
-            if (acceso.rol === 'dev') {
+        if (user.loaded === true) {
+            if (user.rol === 'dev') {
                 return (
                     <div>
                         <Navigator seccion= "Mis apps"/>
@@ -88,7 +66,7 @@ function MeApps() {
                             <Link className="btn btn-outline-secondary" to="/me/new">Nueva aplicacion</Link>
                         </div>
                         <div className="card-columns m-5">{
-                            render.appsToShow.map(function (item, i) {
+                            user.appsToShow.map(function (item, i) {
                                 var goTo ={
                                     pathname: '/me/edit/',
                                     param1: item
@@ -117,7 +95,7 @@ function MeApps() {
                         <Navigator seccion= "Mis compras"/>
                         <div className="card-columns m-5">
                             {
-                            render.appsToShow.map(function (item, i) {
+                            user.appsToShow.map(function (item, i) {
                                 var del ={
                                     pathname: '/me/cancel',
                                     param1: item
@@ -146,10 +124,7 @@ function MeApps() {
     return (
         <div>
             {
-                acceso.estado === 'esperando' ? <Loading/> :
-                acceso.aprobado ? elMe() :
-                <Redirect push to="/signin" />
-
+                elMe() 
             }
         </div>
     )
