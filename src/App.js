@@ -5,12 +5,12 @@ import LoggedRoute from './components/guards/LoggedRoute'
 import SignUp from './components/SignUp';
 import SignIn from './components/routes/signin/SignInPage';
 import Home from './components/routes/home/HomePage';
-import MeApps from './components/MeApps';
 import EditApp from './components/EditApp';
 import NewApp from './components/NewApp';
 import DeleteApp from './components/DeleteApp'
 import SeeApps from './components/SeeApps'
 import CancelBuy from './components/CancelBuy'
+import Apps from './components/routes/me/Apps'
 
 function App() {
   return (
@@ -19,7 +19,7 @@ function App() {
         <Route path="/apps" component={SeeApps} />
         <Route path="/signup" component={SignUp} />
         <Route path="/signin" component={SignIn} />
-        <LoggedRoute component={MeApps} path="/me/apps" />
+        <LoggedRoute component={Apps} path="/me/apps" />
         <Route path="/me/edit" component={EditApp} />
         <Route path="/me/delete" component={DeleteApp} />
         <Route path="/me/new" component={NewApp} />

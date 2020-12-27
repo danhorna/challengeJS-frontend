@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import Navigator from '../components/purpose/Navigator';
-import { getUser } from '../js/helpers';
+import Navigator from '../../purpose/Navigator';
+import { getUser } from '../../../js/helpers';
+import Loading from '../../purpose/Loading';
 
-function MeApps() {
+function Apps() {
     const [user, setUser] = useState({
         loaded: false,
         rol: '',
@@ -56,7 +57,7 @@ function MeApps() {
         }
     })
 
-    function elMe() {
+    function body() {
         if (user.loaded === true) {
             if (user.rol === 'dev') {
                 return (
@@ -116,18 +117,18 @@ function MeApps() {
             }
         } else {
             return (
-                <div>Loading...</div>
+                <Loading />
             )
         }
     }
 
     return (
-        <div>
+        <React.Fragment>
             {
-                elMe() 
+                body() 
             }
-        </div>
+        </React.Fragment>
     )
 }
 
-export default MeApps
+export default Apps

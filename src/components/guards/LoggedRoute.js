@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import { checkLogin } from '../../js/helpers';
+import Loading from '../purpose/Loading'
 
 function LoggedRoute(props) {
   const [state, setState] = useState({
@@ -27,7 +28,7 @@ function LoggedRoute(props) {
           <Component {...props} />
         ) : (
             state.loading ? (
-              <div>LOADING</div>
+              <Loading />
             ) : (
                 <Redirect to={{ pathname: '/signin', state: { from: props.location } }} />
               )
