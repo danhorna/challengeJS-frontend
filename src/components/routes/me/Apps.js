@@ -15,12 +15,12 @@ function Apps() {
 
     useEffect(() => {
 
-        async function dev() {
-            return await axios.get( process.env.REACT_APP_BACK_URL + '/api/users/' + user.id + '/apps')
+        async function dev(userid) {
+            return await axios.get( process.env.REACT_APP_BACK_URL + '/api/users/' + userid + '/apps')
         }
 
-        async function client(){
-            return await await axios.get( process.env.REACT_APP_BACK_URL + '/api/users/' + user.id + '/purchases')
+        async function client(userid){
+            return await await axios.get( process.env.REACT_APP_BACK_URL + '/api/users/' + userid + '/purchases')
                 // .then( async (res) => {
                 //     if (res.data !== null){
                 //         for (const item of res.data){
@@ -42,10 +42,10 @@ function Apps() {
                 .then(async res => {
                     let apps = null
                     if (res.rol === 'dev'){
-                        apps = await dev()
+                        apps = await dev(res.id)
                     }
                     else {
-                        apps = await client()
+                        apps = await client(res.id)
                     }
                     setUser({
                         loaded: true,

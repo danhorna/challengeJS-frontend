@@ -1,47 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link, Redirect } from 'react-router-dom'
-import { checkLogin } from '../js/helpers';
-
-import Navigator from '../components/purpose/Navigator'
-import Loading from './purpose/Loading';
-import SinPermiso from './purpose/SinPermiso';
+import { Link } from 'react-router-dom'
+import { getUser } from '../../../js/helpers';
+import Navigator from '../../purpose/Navigator'
+import Loading from '../../purpose/Loading';
 
 function NewApp() {
-    const [acceso, setAcceso] = useState({
-        estado: 'esperando',
-        aprobado: null,
-        rol: '',
+    const [user, setUser] = useState({
+        loaded: false,
         id: ''
     });
-
-    useEffect(() => {
-        let isMounted = true;
-        function comp() {
-            checkLogin()
-                .then(res => {
-                    if (isMounted)
-                        if (res !== null)
-                            setAcceso({
-                                rol: res.rol,
-                                id: res.id,
-                                estado: 'listo',
-                                aprobado: res.done
-                            })
-                        else {
-                            setAcceso({
-                                ...acceso,
-                                estado: 'listo',
-                                aprobado: false
-                            })
-                        }
-                })
-        }
-        if (acceso.estado !== 'listo') {
-            comp();
-        }
-        return () => { isMounted = false };
-    })
 
     const [actual, setActual] = useState({
         price: '',
@@ -51,6 +19,18 @@ function NewApp() {
         salert: false,
         scont: true
 
+    })
+
+    useEffect(() => {
+        if (!user.loaded) {
+            getUser()
+                .then(async res => {
+                    setUser({
+                        loaded: true,
+                        id: res.id
+                    })
+                })
+        }
     })
 
     const refresh = (e) => {
@@ -68,15 +48,18 @@ function NewApp() {
             logo: actual.logo,
             name: actual.name,
             category: actual.category,
-            creator: acceso.id
+            creator: user.id
         }
-        axios.post('http://localhost:3000/api/apps/newapp', { data })
+        axios.post(process.env.REACT_APP_BACK_URL + '/api/apps',  data )
             .then(res => {
                 setActual({
                     ...actual,
                     salert: true,
                     scont: false
                 })
+            })
+            .catch((e)=>{
+                console.log(e)
             })
     }
 
@@ -127,26 +110,22 @@ function NewApp() {
         )
     }
 
-    function elMe() {
+    function body() {
         return (
-            <div>
+            <React.Fragment>
                 <Navigator />
                 {actual.scont ? cont() : null}
                 {actual.salert ? alert() : null}
-            </div>
+            </React.Fragment>
         )
     }
 
     return (
-        <div>
+        <React.Fragment>
             {
-                acceso.estado === 'esperando' ? <Loading /> :
-                    !acceso.aprobado ? <Redirect push to="/signin" /> :
-                        acceso.rol === 'dev' ? elMe() :
-                            <SinPermiso />
+                body()
             }
-
-        </div>
+        </React.Fragment>
     )
 }
 

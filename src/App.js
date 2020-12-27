@@ -6,7 +6,7 @@ import SignUp from './components/routes/signup/SignUp';
 import SignIn from './components/routes/signin/SignInPage';
 import Home from './components/routes/home/HomePage';
 import EditApp from './components/EditApp';
-import NewApp from './components/NewApp';
+import NewApp from './components/routes/me/NewApp';
 import DeleteApp from './components/DeleteApp'
 import SeeApps from './components/SeeApps'
 import CancelBuy from './components/CancelBuy'
