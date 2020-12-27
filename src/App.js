@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Route} from 'react-router-dom';
+import { BrowserRouter as Router} from 'react-router-dom';
 import LoggedRoute from './components/guards/LoggedRoute'
+import NotLoggedRoute from './components/guards/NotLoggedRoute'
 
 import SignUp from './components/routes/signup/SignUp';
 import SignIn from './components/routes/signin/SignInPage';
@@ -14,12 +15,12 @@ function App() {
   return (
       <Router>
         <LoggedRoute component={Home} path="/" exact />
-        <Route path="/apps" component={SeeApps} />
-        <Route path="/signup" component={SignUp} />
-        <Route path="/signin" component={SignIn} />
+        <LoggedRoute path="/apps" component={SeeApps} />
+        <NotLoggedRoute path="/signup" component={SignUp} />
+        <NotLoggedRoute path="/signin" component={SignIn} />
         <LoggedRoute component={Apps} path="/me/apps" />
-        <Route path="/me/edit" component={EditApp} />
-        <Route path="/me/new" component={NewApp} />
+        <LoggedRoute path="/me/edit" component={EditApp} />
+        <LoggedRoute path="/me/new" component={NewApp} />
       </Router>
   );
 }
