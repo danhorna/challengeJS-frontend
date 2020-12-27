@@ -1,50 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Redirect } from 'react-router-dom'
-import Navigator from '../components/purpose/Navigator';
-import { checkLogin } from '../js/helpers';
-import Loading from './purpose/Loading';
+import Navigator from '../../purpose/Navigator';
+import { getUser } from '../../../js/helpers';
+import Loading from '../../purpose/Loading';
 
 function SeeApps() {
     const [acceso, setAcceso] = useState({
-        estado: 'esperando',
+        loaded: false,
         aprobado: null,
         rol: '',
         id: '',
         apps: [],
         appscargadas: false,
-        postCompra: false,
         idComprados: [],
         cargado: false
     });
 
     useEffect(() => {
-        let isMounted = true;
-
-        function comp() {
-            checkLogin()
-                .then(res => {
-                    if (isMounted)
-                        if (res !== null)
-                            setAcceso({
-                                ...acceso,
-                                rol: res.rol,
-                                id: res.id,
-                                estado: 'listo',
-                                aprobado: res.done
-                            })
-                        else {
-                            setAcceso({
-                                ...acceso,
-                                estado: 'listo',
-                                aprobado: false
-                            })
-                        }
+        if (!acceso.loaded) {
+            getUser()
+                .then(async res => {
+                    setAcceso({
+                        ...acceso,
+                        loaded: true,
+                        rol: res.rol,
+                        id: res.id,
+                    })
                 })
         }
+        let isMounted = true;
 
         async function cargar() {
-            const appsToShow = await axios.get('http://localhost:3000/api/apps');
+            const appsToShow = await axios.get(process.env.REACT_APP_BACK_URL + '/api/apps');
             if (isMounted)
                 setAcceso({
                     ...acceso,
@@ -55,7 +42,7 @@ function SeeApps() {
 
         function appsCompradas() {
             var appCom = [];
-            axios.post('http://localhost:3000/api/purchases', acceso)
+            axios.get(process.env.REACT_APP_BACK_URL + '/api/users/' + acceso.id + '/purchases')
                 .then(res => {
                     if (res.data !== null) {
                         res.data.forEach(element => {
@@ -71,33 +58,29 @@ function SeeApps() {
                 })
         }
 
-        if (acceso.estado !== 'listo') {
-            comp();
+        if (!acceso.appscargadas) {
+            cargar()
         }
         else {
-            if (!acceso.appscargadas) {
-                cargar()
-            }
-            else {
-                if (!acceso.cargado) {
-                    appsCompradas();
-                }
+            if (!acceso.cargado) {
+                appsCompradas();
             }
         }
+        
         return () => { isMounted = false };
     })
 
 
-    async function comprar(item) {
+    function comprar(item) {
         const data = {
             appId: item.id,
             userId: acceso.id
         }
-        axios.post('http://localhost:3000/api/buy', data)
+        axios.post(process.env.REACT_APP_BACK_URL + '/api/purchases', data)
             .then(req => {
                 setAcceso({
                     ...acceso,
-                    postCompra: true
+                    cargado: false
                 })
             })
     }
@@ -145,10 +128,7 @@ function SeeApps() {
     return (
         <div>
             {
-                acceso.postCompra ? (<Redirect push to="/me/apps" />) :
-                    acceso.estado === 'esperando' ? <Loading /> :
-                        acceso.aprobado ? elMe() :
-                            <Redirect push to="/signin" />
+                !acceso.loaded? <Loading /> : elMe()
             }
         </div>
     )

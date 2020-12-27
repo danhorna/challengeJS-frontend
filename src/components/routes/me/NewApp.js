@@ -3,7 +3,6 @@ import axios from 'axios';
 import { Link } from 'react-router-dom'
 import { getUser } from '../../../js/helpers';
 import Navigator from '../../purpose/Navigator'
-import Loading from '../../purpose/Loading';
 
 function NewApp() {
     const [user, setUser] = useState({

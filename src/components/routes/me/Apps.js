@@ -16,25 +16,21 @@ function Apps() {
     useEffect(() => {
 
         async function dev(userid) {
-            return await axios.get( process.env.REACT_APP_BACK_URL + '/api/users/' + userid + '/apps')
+            let apps = await axios.get( process.env.REACT_APP_BACK_URL + '/api/users/' + userid + '/apps')
+            return apps.data
         }
 
         async function client(userid){
-            return await await axios.get( process.env.REACT_APP_BACK_URL + '/api/users/' + userid + '/purchases')
-                // .then( async (res) => {
-                //     if (res.data !== null){
-                //         for (const item of res.data){
-                //             var prod = await axios.post('http://localhost:3000/api/apps/getbyid',item)
-                //             prod.data.idcompra = item.id;
-                //             forTheBoys.push(prod.data)
-                //         }
-                //     }
-                //     setRender({
-                //         estado: 'go',
-                //         appsToShow: forTheBoys
-                //     })
-                    
-                // })
+            let data = []
+            let purchases = await axios.get( process.env.REACT_APP_BACK_URL + '/api/users/' + userid + '/purchases')
+            if (purchases.length !== 0) {
+                for (const item of purchases.data) {
+                    let app = await axios.get(process.env.REACT_APP_BACK_URL + '/api/apps/' + item.app_id)
+                    app.data[0].purchaseid = item.id
+                    data.push(app.data[0])
+                }
+            }
+            return data
         }
 
         if (!user.loaded) {
@@ -51,14 +47,34 @@ function Apps() {
                         loaded: true,
                         rol: res.rol,
                         id: res.id,
-                        appsToShow: apps.data
+                        appsToShow: apps
                     })
                 })
         }
     })
 
+    function cancel(item) {
+        axios.delete(process.env.REACT_APP_BACK_URL + '/api/purchases/' + item.purchaseid)
+            .then(res => {
+                setUser({
+                    ...user,
+                    loaded: false
+                })
+            })
+    }
+
+    function deleteApp(item) {
+        axios.delete(process.env.REACT_APP_BACK_URL + '/api/apps/' + item.id)
+            .then(res => {
+                setUser({
+                    ...user,
+                    loaded: false
+                })
+            })
+    }
+
     function body() {
-        if (user.loaded === true) {
+        if (user.loaded) {
             if (user.rol === 'dev') {
                 return (
                     <div>
@@ -72,10 +88,6 @@ function Apps() {
                                     pathname: '/me/edit/',
                                     param1: item
                                 }
-                                var del ={
-                                    pathname: '/me/delete',
-                                    param1: item
-                                }
                                 return <div className="card text-center" key={i}>
                                     <img className="card-img-top mt-3" src={item.logo} alt="logo" />
                                     <div className="card-body">
@@ -83,7 +95,7 @@ function Apps() {
                                         <p className="text-info">Categoria: {item.category}</p>
                                         <p className="card-text">Precio: ${item.price}</p>
                                         <Link className="btn btn-primary" to={goTo}>Editar</Link>
-                                        <Link className="btn btn-danger ml-5" to={del}>Eliminar</Link>
+                                        <button type="button" className="btn btn-danger ml-5" onClick={() => deleteApp(item)}>Eliminar</button>
                                     </div>
                                 </div>
                             })}
@@ -97,17 +109,13 @@ function Apps() {
                         <div className="card-columns m-5">
                             {
                             user.appsToShow.map(function (item, i) {
-                                var del ={
-                                    pathname: '/me/cancel',
-                                    param1: item
-                                }
                                 return <div className="card text-center" key={i}>
                                     <img className="card-img-top mt-3" src={item.logo} alt="logo" />
                                     <div className="card-body">
                                         <h5 className="card-title">{item.name}</h5>
                                         <p className="text-info">Categoria: {item.category}</p>
                                         <p className="card-text">Precio: ${item.price}</p>
-                                        <Link className="btn btn-danger" to={del}>Cancelar compra</Link>
+                                        <button type="button" className="btn btn-danger" onClick={() => cancel(item)}>Cancelar compra</button>
                                     </div>
                                 </div>
                             })}
