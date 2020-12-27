@@ -1,21 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
-import Loading from './purpose/Loading';
-import { checkLogin } from '../js/helpers';
-import Aprobado from './purpose/Aprobado';
 
-function SignUp() {
+function SignUp(props) {
     const [campos, setCampos] = useState({
         email: '',
         password: '',
         rol: '',
     })
-
-    const [acceso, setAcceso] = useState({
-        estado: 'esperando',
-        aprobado: null
-    });
 
     const theSubmit = (e) => {
         e.preventDefault();
@@ -26,12 +18,12 @@ function SignUp() {
         }
         let emailtest = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[A-Za-z]+$/;
         if (emailtest.test(data.email)) {
-            axios.post('http://localhost:3000/api/users', data )
+            axios.post(process.env.REACT_APP_BACK_URL + '/api/users', data )
                 .then(res => {
-                    setAcceso({
-                        ...acceso,
-                        estado: 'registered'
-                    })
+                    props.history.push('/signin')
+                })
+                .catch((e)=>{
+                    console.log(e)
                 })
         }else {
             alert("La dirección de email es incorrecta.");
@@ -53,31 +45,8 @@ function SignUp() {
         }
     }
 
-    useEffect(() => {
-        let isMounted = true;
-        function comp() {
-            checkLogin()
-                .then(res => {
-                    if (isMounted)
-                        if (res !== null)
-                            setAcceso({
-                                estado: 'listo',
-                                aprobado: res.done
-                            })
-                        else {
-                            setAcceso({
-                                estado: 'listo',
-                                aprobado: false
-                            })
-                        }
-                })
-        }
-        comp()
-        return () => { isMounted = false };
-    }, [])
-
-    function bodySignup() {
-        return (
+    return (
+        <div className="container d-flex h-100">
             <div className="align-self-center w-100">
                 <div className="col-lg-4 mx-auto">
                     <div className="card text-center p-4 shadow-lg p-3 mb-5 bg-white rounded">
@@ -87,7 +56,7 @@ function SignUp() {
                             <form className="mt-5" onSubmit={theSubmit}>
                                 <input type="email" className="form-control" id="email" name="email" placeholder="Email" value={campos.email} onChange={refresh} />
                                 <br />
-                                <input type="password" className="form-control" id="password" name="password" placeholder="Password" value={campos.password} onChange={refresh} required/>
+                                <input type="password" autoComplete="on" className="form-control" id="password" name="password" placeholder="Password" value={campos.password} onChange={refresh} required/>
                                 <br />
                                 <div className="custom-control custom-radio custom-control-inline">
                                     <input type="radio" id="client" name="rol" className="custom-control-input" onChange={refresh} required/>
@@ -107,16 +76,6 @@ function SignUp() {
                     </div>
                 </div>
             </div>
-        )
-    }
-
-    return (
-        <div className="container d-flex h-100">
-            {acceso.estado === 'cargando' ? <Loading /> :
-                acceso.estado === 'registered' ? <Redirect push to="/signin" /> :
-                    acceso.aprobado ? <Aprobado /> :
-                        bodySignup()
-            }
         </div>
     )
 }
